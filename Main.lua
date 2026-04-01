@@ -1,8 +1,8 @@
 -- ИСПРАВЛЕННЫЙ VANDOLY X LOADER
-local assetId = 1234567890 -- ВСТАВЬ СВОЙ ID ЗДЕСЬ
+local assetId = 124078092058387 -- ВСТАВЬ СВОЙ ID ЗДЕСЬ
 
 local success, model = pcall(function()
-    return game:GetObjects("rbxassetid://124078092058387" .. assetId)[1]
+    return game:GetObjects("rbxassetid://" .. assetId)[1]
 end)
 
 if success and model then
