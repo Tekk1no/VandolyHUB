@@ -1,26 +1,31 @@
--- ИСПРАВЛЕННЫЙ VANDOLY X LOADER
-local assetId = 124078092058387 -- ВСТАВЬ СВОЙ ID ЗДЕСЬ
+-- VANDOLY X CORE LOADER
+local assetId = 124078092058387 -- Твой ID
 
 local success, model = pcall(function()
     return game:GetObjects("rbxassetid://" .. assetId)[1]
 end)
 
 if success and model then
-    -- Удаляем старую версию, если она есть
+    -- 1. Очистка старой версии
     if game.CoreGui:FindFirstChild("VandolyX") then
         game.CoreGui.VandolyX:Destroy()
     end
 
     model.Parent = game:GetService("CoreGui")
+    local mainFrame = model:FindFirstChild("ZenithMainFrame") [cite: 2]
     
-    -- Проверка пути до главного фрейма (как в твоем .rbxm)
-    local main = model:FindFirstChild("ZenithMainFrame")
-    if main then
-        print("Vandoly X: Успешно загружено!")
-        -- Здесь пошла логика кнопок (Sidebar, Pages и т.д.)
+    -- 2. Активация встроенной логики (MainScript)
+    local mainScript = model:FindFirstChild("MainScript") or mainFrame:FindFirstChild("MainScript") [cite: 7]
+    if mainScript and mainScript:IsA("LuaSourceContainer") then
+        -- Создаем копию скрипта как LocalScript, чтобы он заработал при инжекте
+        local runScript = Instance.new("LocalScript")
+        runScript.Name = "VandolyRun"
+        runScript.Source = mainScript.Source
+        runScript.Parent = mainFrame
+        print("Vandoly X: Логика запущена!")
     else
-        warn("Vandoly X: Не найден ZenithMainFrame внутри модели!")
+        warn("Vandoly X: Встроенный MainScript не найден!")
     end
 else
-    warn("Vandoly X: Не удалось скачать модель. Проверь Asset ID и доступ!")
+    warn("Vandoly X: Ошибка загрузки модели!")
 end
