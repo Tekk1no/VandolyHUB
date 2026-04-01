@@ -1,4 +1,4 @@
--- VANDOLY X ULTIMATE LOADER (FIXED)
+-- VANDOLY X ULTIMATE LOADER (FIXED V2)
 local assetId = 124078092058387 -- Твой ID
 
 local success, model = pcall(function()
@@ -47,16 +47,13 @@ if success and model then
     end)
 
     -- 3. [ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК]
-    local function switchPage(btnName)
+    local function switchPage(rawName)
         if not content then return end
-        
-        -- Очищаем имя кнопки от мусора (Tab_, Button, _Btn)
-        local target = btnName:lower():gsub("tab_", ""):gsub("button", ""):gsub("_btn", ""):gsub("btn", "")
+        local target = rawName:lower():gsub("tab_", ""):gsub("button", ""):gsub("_btn", ""):gsub("btn", "")
         
         for _, page in pairs(content:GetChildren()) do
-            local pageName = page.Name:lower():gsub("page", ""):gsub("frame", "")
-            
             if page:IsA("GuiObject") then
+                local pageName = page.Name:lower():gsub("page", ""):gsub("frame", "")
                 if pageName == target then
                     page.Visible = true
                 else
@@ -66,28 +63,61 @@ if success and model then
         end
     end
 
-    -- Назначаем клик всем кнопкам в Sidebar
     if sidebar then
         for _, item in pairs(sidebar:GetDescendants()) do
-            if item:IsA("TextButton") or item:IsA("ImageButton") then
+            if item:IsA("GuiButton") then -- Ищем TextButton или ImageButton
                 item.MouseButton1Click:Connect(function()
-                    print("Vandoly X: Переключение на " .. item.Name)
-                    switchPage(item.Name)
+                    -- Если имя стандартное, берем имя папки (например, "Player")
+                    local nameToUse = item.Name
+                    if nameToUse == "TextButton" or nameToUse == "ImageButton" or nameToUse == "Button" then
+                        nameToUse = item.Parent.Name
+                    end
+                    
+                    print("Vandoly X: Вкладка -> " .. nameToUse)
+                    switchPage(nameToUse)
                 end)
             end
         end
     end
 
-    -- 4. [КНОПКА ЗАКРЫТИЯ]
-    local closeBtn = main:FindFirstChild("Close", true) or main:FindFirstChild("Exit", true)
-    if closeBtn then
-        closeBtn.MouseButton1Click:Connect(function()
-            model:Destroy()
-            print("Vandoly X: Скрипт выключен")
-        end)
+    -- 4. [КНОПКИ ЗАКРЫТИЯ И СВОРАЧИВАНИЯ]
+    -- Умный поиск кнопок управления окном
+    local function setupWindowAction(keywords, actionFunc)
+        for _, obj in pairs(main:GetDescendants()) do
+            local objName = obj.Name:lower()
+            for _, word in pairs(keywords) do
+                if string.find(objName, word) then
+                    -- Если это не сама кнопка, ищем кнопку внутри нее
+                    local btn = obj
+                    if not btn:IsA("GuiButton") then
+                        btn = obj:FindFirstChildOfClass("TextButton") or obj:FindFirstChildOfClass("ImageButton")
+                    end
+                    
+                    if btn and btn:IsA("GuiButton") then
+                        btn.MouseButton1Click:Connect(actionFunc)
+                        return
+                    end
+                end
+            end
+        end
     end
 
-    print("Vandoly X v0.1: Полная инициализация завершена! 🚀")
+    -- Крестик (Закрыть)
+    setupWindowAction({"close", "exit"}, function()
+        model:Destroy()
+        print("Vandoly X: Закрыто")
+    end)
+
+    -- Минус (Свернуть)
+    setupWindowAction({"minimize", "min"}, function()
+        if content and sidebar then
+            content.Visible = not content.Visible
+            sidebar.Visible = not sidebar.Visible
+            -- Опционально: можно тут еще менять размер ZenithMainFrame
+        end
+    end)
+
+    print("Vandoly X v0.1: Все системы онлайн! 🚀")
 else
-    warn("Vandoly X: Ошибка загрузки модели! Проверь Asset ID.")
+    warn("Vandoly X: Ошибка загрузки модели!")
 end
