@@ -1,3 +1,4 @@
+-- VANDOLY X ULTIMATE LOADER (FIXED)
 local assetId = 124078092058387 -- Твой ID
 
 local success, model = pcall(function()
@@ -5,16 +6,19 @@ local success, model = pcall(function()
 end)
 
 if success and model then
+    -- 1. Удаление старой копии
     if game.CoreGui:FindFirstChild("VandolyX") then
         game.CoreGui.VandolyX:Destroy()
     end
 
     model.Parent = game:GetService("CoreGui")
     local main = model:FindFirstChild("ZenithMainFrame")
+    if not main then warn("Vandoly X: ZenithMainFrame не найден!") return end
+    
     local sidebar = main:FindFirstChild("Sidebar")
     local content = main:FindFirstChild("ContentArea")
 
-    -- [ФУНКЦИЯ ПЕРЕТАСКИВАНИЯ] (Из твоего кода)
+    -- 2. [СИСТЕМА ПЕРЕТАСКИВАНИЯ (DRAG)]
     local UserInputService = game:GetService("UserInputService")
     local dragging, dragInput, dragStart, startPos
 
@@ -42,25 +46,48 @@ if success and model then
         end
     end)
 
-    -- [ЛОГИКА ВКЛАДОК] (Авто-поиск страниц)
-    for _, btn in pairs(sidebar:GetDescendants()) do
-        if btn:IsA("TextButton") or btn:IsA("ImageButton") then
-            btn.MouseButton1Click:Connect(function()
-                for _, page in pairs(content:GetDescendants()) do
-                    if page:IsA("ScrollingFrame") or page:IsA("Frame") then
-                        -- Если имя кнопки совпадает с именем страницы (например PlayerBtn -> PlayerPage)
-                        if string.find(page.Name, btn.Name:gsub("Button", "")) then
-                            page.Visible = true
-                        else
-                            if page.Parent == content then page.Visible = false end
-                        end
-                    end
+    -- 3. [ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК]
+    local function switchPage(btnName)
+        if not content then return end
+        
+        -- Очищаем имя кнопки от мусора (Tab_, Button, _Btn)
+        local target = btnName:lower():gsub("tab_", ""):gsub("button", ""):gsub("_btn", ""):gsub("btn", "")
+        
+        for _, page in pairs(content:GetChildren()) do
+            local pageName = page.Name:lower():gsub("page", ""):gsub("frame", "")
+            
+            if page:IsA("GuiObject") then
+                if pageName == target then
+                    page.Visible = true
+                else
+                    page.Visible = false
                 end
-            end)
+            end
         end
     end
 
-    print("Vandoly X: UI и логика успешно восстановлены!")
+    -- Назначаем клик всем кнопкам в Sidebar
+    if sidebar then
+        for _, item in pairs(sidebar:GetDescendants()) do
+            if item:IsA("TextButton") or item:IsA("ImageButton") then
+                item.MouseButton1Click:Connect(function()
+                    print("Vandoly X: Переключение на " .. item.Name)
+                    switchPage(item.Name)
+                end)
+            end
+        end
+    end
+
+    -- 4. [КНОПКА ЗАКРЫТИЯ]
+    local closeBtn = main:FindFirstChild("Close", true) or main:FindFirstChild("Exit", true)
+    if closeBtn then
+        closeBtn.MouseButton1Click:Connect(function()
+            model:Destroy()
+            print("Vandoly X: Скрипт выключен")
+        end)
+    end
+
+    print("Vandoly X v0.1: Полная инициализация завершена! 🚀")
 else
-    warn("Vandoly X: Ошибка загрузки!")
+    warn("Vandoly X: Ошибка загрузки модели! Проверь Asset ID.")
 end
