@@ -1,4 +1,4 @@
-local assetId = 12407809205 -- Твой ID
+local assetId = 124078092058387 -- Твой ID
 
 local success, model = pcall(function()
     return game:GetObjects("rbxassetid://" .. assetId)[1]
