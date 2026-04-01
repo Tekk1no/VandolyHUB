@@ -1,39 +1,26 @@
--- VANDOLY X MAIN LOADER
-local assetId = 124078092058387 -- ЗАМЕНИ НА СВОЙ ID ИЗ ШАГА 1
+-- ИСПРАВЛЕННЫЙ VANDOLY X LOADER
+local assetId = 1234567890 -- ВСТАВЬ СВОЙ ID ЗДЕСЬ
 
--- Загрузка UI из облака Roblox
 local success, model = pcall(function()
-    return game:GetObjects("rbxassetid://" .. assetId)[1]
+    return game:GetObjects("rbxassetid://124078092058387" .. assetId)[1]
 end)
 
-if not success or not model then
-    warn("Vandoly X: Ошибка загрузки UI!")
-    return
-end
-
--- Размещение в CoreGui (чтобы не удалили обычным Reset)
-model.Parent = game:GetService("CoreGui")
-local mainFrame = model.ZenithMainFrame -- Твой главный фрейм [cite: 2]
-
--- ЛОГИКА ВКЛАДОК (Пример для твоих кнопок)
-local sidebar = mainFrame.Sidebar -- Твой сайдбар [cite: 13]
-local pages = mainFrame.ContentArea.ScrollingFrame -- Твои страницы [cite: 13, 2]
-
-local function showPage(name)
-    for _, page in pairs(pages:GetChildren()) do
-        if page:IsA("Frame") then
-            page.Visible = (page.Name == name)
-        end
+if success and model then
+    -- Удаляем старую версию, если она есть
+    if game.CoreGui:FindFirstChild("VandolyX") then
+        game.CoreGui.VandolyX:Destroy()
     end
+
+    model.Parent = game:GetService("CoreGui")
+    
+    -- Проверка пути до главного фрейма (как в твоем .rbxm)
+    local main = model:FindFirstChild("ZenithMainFrame")
+    if main then
+        print("Vandoly X: Успешно загружено!")
+        -- Здесь пошла логика кнопок (Sidebar, Pages и т.д.)
+    else
+        warn("Vandoly X: Не найден ZenithMainFrame внутри модели!")
+    end
+else
+    warn("Vandoly X: Не удалось скачать модель. Проверь Asset ID и доступ!")
 end
-
--- Привязка кнопок из твоего файла [cite: 19]
-sidebar.PlayerButton.MouseButton1Click:Connect(function()
-    showPage("PlayerPage")
-end)
-
-sidebar.VisualButton.MouseButton1Click:Connect(function()
-    showPage("VisualPage")
-end)
-
--- Сюда добавляешь остальной функционал (Speed, Stamina, ESP)
